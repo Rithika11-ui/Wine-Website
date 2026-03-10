@@ -1,5 +1,5 @@
 import api from "./Api";
-import { UserBanner } from "../../Types/Types";
+import { UserBanner } from "../Types/Types";
 
 export const getBanners = async (): Promise<UserBanner[]> => {
   const res = await api.get<UserBanner[]>("/api/banner");

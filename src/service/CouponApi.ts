@@ -1,4 +1,4 @@
-import { Coupon } from "../../Types/Types"
+import { Coupon } from "../Types/Types"
 import api from "./Api"
 
 export const getAllCoupon = async (): Promise<Coupon> => {

@@ -1,6 +1,4 @@
-import React from 'react';
 import { User, Lock, MapPin, Bell, Wine, ChevronRight, Camera, Settings } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const UserAccount = () => {
   return (

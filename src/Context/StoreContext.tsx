@@ -29,13 +29,16 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
 
     const url = "http://localhost:5059"
 
-    // Fetch products from backend
+    // Fetch products only when logged in
     useEffect(() => {
         const fetchProducts = async () => {
+            const token = localStorage.getItem("token");
+            if (!token || token === "undefined") return; // don't fetch if not logged in
+
             setLoadingProducts(true);
             try {
-                const res = await api.get("/products"); // change "/products" to your actual endpoint
-                setProducts(res.data);
+                const res = await api.get("/products");
+                setProducts(res.data.data); // backend returns { success, message, data: [...] }
             } catch (error) {
                 console.error("Failed to fetch products", error);
             } finally {
@@ -106,8 +109,8 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
 
     const contextValue = {
         url,
-        products,        // ← products array for Shop
-        loadingProducts, // ← loading state
+        products,
+        loadingProducts,
         cart,
         countItem,
         setCountItem,

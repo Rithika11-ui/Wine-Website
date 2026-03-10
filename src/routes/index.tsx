@@ -3,7 +3,7 @@ import NotFound from '../components/pages/NotFound'
 import ProductDetail from '../components/products/ProductDetails'
 import CheckoutPage from '../components/products/CheckoutProduct'
 import CartPage from '../components/products/CartPage'
-import Payment from '../User/Payment/Payment'
+// import Payment from '../User/Payment/Payment'
 import UserAccount from '../User/UserProfile'
 import Login from '../Auth/Login'
 import Register from '../Auth/Register'
@@ -18,16 +18,27 @@ import Homepage from '../User/Homepage'
 import Shop from '../User/Shop'
 import PrivateRoute from '../components/PrivateRoutes.tsx/PrivateRoutes'
 import Header from '../Layout/Header'
+import Footer from '../Layout/Footer'
+import Favorites from '../components/products/FavoriteProducts'
 
 const UserLayout = () => (
   <>
     <Header />
     <Outlet />
+    <Footer/>
   </>
 )
 
 const appRoutes = [
-  { path: '/', element: <Navigate to="/signin" replace /> },
+  { 
+  path: '/', 
+  element: <Navigate to={
+    localStorage.getItem("token") && localStorage.getItem("token") !== "undefined" 
+      ? "/home" 
+      : "/signin"
+  } replace /> 
+  },
+
 
   { path: '/signin', element: <Login /> },
   { path: '/signup', element: <Register /> },
@@ -79,12 +90,46 @@ const appRoutes = [
     ]
   },
 
+  {
+    path: '/user-profile',
+    element: <PrivateRoute requiredRole={1}><UserLayout /></PrivateRoute>,
+    children: [
+      {index: true, element: <UserAccount/>}
+    ]
+  },
+
+  {
+    path: '/favorite-cart',
+    element: <PrivateRoute requiredRole={1}><UserLayout /></PrivateRoute>,
+    children: [
+      {index: true , element: <Favorites/>}
+    ]
+  },
+
+  {
+    path: '/shopping-cart',
+    element: <PrivateRoute requiredRole={1}><UserLayout /></PrivateRoute>,
+    children: [
+      {index: true, element: <CartPage/>}
+    ]
+  },
+
+  {
+    path: '/user-profile',
+    element: <PrivateRoute requiredRole={1}><UserLayout /></PrivateRoute>,
+    Children: [
+      {index: true , element: <UserAccount/>}
+    ]
+  },
   // Other protected pages
   // { path: '/payment', element: <PrivateRoute requiredRole={1}><UserLayout><Payment /></UserLayout></PrivateRoute> },
-  // { path: '/user', element: <PrivateRoute requiredRole={1}><UserLayout><UserAccount /></UserLayout></PrivateRoute> },
 
   // 404
-  { path: '*', element: <NotFound /> },
+  {
+  path: '*',
+  element: <UserLayout />,
+  children: [{ index: true, element: <NotFound /> }]
+  }
 ]
 
 export default appRoutes

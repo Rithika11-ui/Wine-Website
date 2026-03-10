@@ -1,5 +1,5 @@
 
-import { CheckoutRequest, Order, OrderStatus, PaginatedResponse } from '../../Types/Types';
+import { CheckoutRequest, Order, OrderStatus, PaginatedResponse } from '../Types/Types';
 import api from './Api';
 
 export const placeOrder = async (data: CheckoutRequest): Promise<Order> => {

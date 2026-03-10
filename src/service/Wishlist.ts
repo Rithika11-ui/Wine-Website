@@ -1,6 +1,6 @@
 // services/wishlist.service.ts
 import api from "./Api";
-import type { WishlistItem } from "../../Types/Types";
+import type { WishlistItem } from "../Types/Types";
 
 export const getWishlist = async (): Promise<WishlistItem[]> => {
   const res = await api.get<WishlistItem[]>("/wishlist");

@@ -1,4 +1,4 @@
-import { PaginatedResponse, Wine, WineFilters } from "../../Types/Types";
+import { PaginatedResponse, Wine, WineFilters } from "../Types/Types";
 import api from "./Api";
 
 export const getProduct = async (filters: WineFilters ={}): Promise<PaginatedResponse<Wine>> => {

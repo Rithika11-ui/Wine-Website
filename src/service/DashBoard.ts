@@ -1,5 +1,5 @@
 // services/dashboard.service.ts
-import { DashboardStats, RevenueChart, OrderStats } from "../../Types/Types";
+import { DashboardStats, RevenueChart, OrderStats } from "../Types/Types";
 import api from "./Api";
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {

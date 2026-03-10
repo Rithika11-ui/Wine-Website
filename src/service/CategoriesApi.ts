@@ -1,4 +1,4 @@
-import { WineCategories } from "../../Types/Types";
+import { WineCategories } from "../Types/Types";
 import api from "./Api"
 
 export const getAllCategories = async (): Promise<WineCategories> => {

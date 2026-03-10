@@ -14,6 +14,10 @@ const Header = () => {
   { label: 'BLOG', path: '/blog', hasDropdown: false },
   { label: 'ABOUT US', path: '/about-us', hasDropdown: false },
   { label: 'CONTACT US', path: '/contact-us', hasDropdown: false },
+  { label: '', path: '/favorite-cart', hasDropdown: false },
+  { label: '', path: '/shopping-cart', hasDropdown: false },
+  { label: '', path: '/user-profile', hasDropdown: false },
+  
 ];
 
 
@@ -143,14 +147,14 @@ const Header = () => {
 
           {/* ICONS */}
           <div className="flex items-center space-x-4 text-gray-600">
-            <button className="hover:text-red-800"><Heart size={20} /></button>
-            <button className="hover:text-red-800 relative">
+            <button className="hover:text-red-800"><Link to={'/favorite-cart'}><Heart size={20} /></Link></button>
+            <Link to='/shopping-cart' className="hover:text-red-800 relative">
               <ShoppingCart size={20} />
               <span className="absolute -top-2 -right-2 bg-red-800 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center">
                 0
               </span>
-            </button>
-            <button className="hover:text-red-800"><User size={20} /></button>
+            </Link>
+            <button className="hover:text-red-800"> <Link to={'/user-profile'}><User size={20} /></Link></button>
             <button className="md:hidden"><Menu size={24} /></button>
           </div>
 

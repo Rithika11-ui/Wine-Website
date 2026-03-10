@@ -1,4 +1,4 @@
-import { Cart} from "../../Types/Types";
+import { Cart} from "../Types/Types";
 import api from "./Api";
 
 export const getCart = async (): Promise<Cart> => {

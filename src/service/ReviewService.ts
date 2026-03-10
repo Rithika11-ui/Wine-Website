@@ -1,5 +1,5 @@
 // services/review.service.ts
-import { PaginatedResponse, Review, CreateReviewRequest } from "../../Types/Types";
+import { PaginatedResponse, Review, CreateReviewRequest } from "../Types/Types";
 import api from "./Api";
 
 //    USER
