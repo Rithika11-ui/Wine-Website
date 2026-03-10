@@ -1,0 +1,18 @@
+@baseUrl = http://localhost:5094
+@token = wine-website-super-secret-jwt-key-2024!$$
+
+
+
+
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+    "userName": "admin",
+    "email": "admin@gmail.com",
+    "password": "Admin1234!",
+    "role": 0,
+    "phoneNumber": "012345678",
+    "address": "Phnom Penh",
+    "image": ""
+}
