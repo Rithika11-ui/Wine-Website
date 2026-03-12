@@ -1,22 +1,27 @@
-import { User, Lock, MapPin, Bell, Wine, ChevronRight, Camera, Settings } from 'lucide-react';
+import { User, Lock, MapPin, Bell, Wine, ChevronRight, Camera, Settings, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import SignOut from './Signout';
+import { useNavigate } from 'react-router-dom';
+
 
 const UserAccount = () => {
+  const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   return (
     <div className="bg-[#FDFCF8] h-screen font-sans text-stone-900">
+
+      <SignOut isOpen={showLogoutModal} onClose={() => setShowLogoutModal(false)} />
+
       <div className="container mx-auto px-6 py-6 lg:py-6">
-        
-        {/* --- HEADER SECTION --- */}
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <div>
             <h1 className="text-5xl font-serif italic text-stone-900">My Account</h1>
             <p className="text-[10px] uppercase tracking-[0.4em] text-stone-400 font-bold mt-2">Manage your estate preferences</p>
           </div>
-          
         </div>
 
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* --- PROFILE CARD --- */}
           <div className="lg:col-span-2 bg-white border border-stone-100 p-10 shadow-sm space-y-10">
             <div className="flex items-center gap-8 border-b border-stone-50 pb-10">
               <div className="relative">
@@ -58,10 +63,7 @@ const UserAccount = () => {
             </form>
           </div>
 
-          {/* --- SIDEBAR MODULES --- */}
           <div className="space-y-8">
-            
-            {/* Membership Module */}
             <div className="bg-stone-900 p-8 text-white">
               <div className="flex justify-between items-start mb-6">
                 <Wine size={24} className="text-white" />
@@ -74,9 +76,10 @@ const UserAccount = () => {
               </div>
             </div>
 
-            {/* Quick Actions List */}
             <div className="bg-white border border-stone-100 shadow-sm divide-y divide-stone-50">
-              <button className="w-full flex items-center justify-between p-6 hover:bg-stone-50 transition-colors group">
+              <button
+                onClick={() => navigate('/user-profile/security-login')}
+                className="w-full flex items-center justify-between p-6 hover:bg-stone-50 transition-colors group">
                 <div className="flex items-center gap-4">
                   <Lock size={16} className="text-stone-400" />
                   <span className="text-[10px] uppercase tracking-widest font-bold">Security & Login</span>
@@ -84,7 +87,9 @@ const UserAccount = () => {
                 <ChevronRight size={14} className="text-stone-300 group-hover:text-red-900 transition-colors" />
               </button>
               
-              <button className="w-full flex items-center justify-between p-6 hover:bg-stone-50 transition-colors group">
+              <button
+                onClick={() => navigate('/user-profile/address')}
+                className="w-full flex items-center justify-between p-6 hover:bg-stone-50 transition-colors group">
                 <div className="flex items-center gap-4">
                   <MapPin size={16} className="text-stone-400" />
                   <span className="text-[10px] uppercase tracking-widest font-bold">Manage Addresses</span>
@@ -92,7 +97,9 @@ const UserAccount = () => {
                 <ChevronRight size={14} className="text-stone-300 group-hover:text-red-900 transition-colors" />
               </button>
 
-              <button className="w-full flex items-center justify-between p-6 hover:bg-stone-50 transition-colors group">
+              <button
+                onClick={() => navigate('/user-profile/notification')}
+                className="w-full flex items-center justify-between p-6 hover:bg-stone-50 transition-colors group">
                 <div className="flex items-center gap-4">
                   <Bell size={16} className="text-stone-400" />
                   <span className="text-[10px] uppercase tracking-widest font-bold">Notifications</span>
@@ -100,17 +107,29 @@ const UserAccount = () => {
                 <ChevronRight size={14} className="text-stone-300 group-hover:text-red-900 transition-colors" />
               </button>
               
-              <button className="w-full flex items-center justify-between p-6 hover:bg-stone-50 transition-colors group">
+              <button
+                onClick={() => navigate('/user-profile/delete-account')}
+                className="w-full flex items-center justify-between p-6 hover:bg-stone-50 transition-colors group">
                 <div className="flex items-center gap-4 text-red-900">
                   <Settings size={16} />
                   <span className="text-[10px] uppercase tracking-widest font-bold">Account Deletion</span>
                 </div>
                 <ChevronRight size={14} className="text-stone-300 group-hover:text-red-900 transition-colors" />
               </button>
+
+              <button
+                type="button"
+                onClick={() => setShowLogoutModal(true)}
+                className="w-full flex items-center justify-between p-6 hover:bg-red-50 transition-colors group"
+              >
+                <div className="flex items-center gap-4 text-red-900">
+                  <LogOut size={16} />
+                  <span className="text-[10px] uppercase tracking-widest font-bold">Sign Out</span>
+                </div>
+                <ChevronRight size={14} className="text-stone-300 group-hover:text-red-900 transition-colors" />
+              </button>
             </div>
-
           </div>
-
         </div>
       </div>
     </div>

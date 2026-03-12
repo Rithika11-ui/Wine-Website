@@ -1,8 +1,10 @@
 import React from 'react';
 import assets from '../../assets/assets';
 import { X, Minus, Plus, ShoppingBag, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const CartPage = () => {
+  const navigate = useNavigate();
   return (
     <div className="bg-[#FDFCF8] min-h-screen py-16 font-sans">
       <div className="container mx-auto px-6 max-w-7xl">
@@ -140,7 +142,7 @@ const CartPage = () => {
                 </div>
               </label>
 
-              <button className="w-full bg-stone-900 hover:bg-red-900 text-white py-6 text-[11px] uppercase tracking-[0.5em] font-bold transition-all shadow-2xl flex items-center justify-center gap-3">
+              <button  onClick={() => navigate('/shop/checkout')} className="w-full bg-stone-900 hover:bg-red-900 text-white py-6 text-[11px] uppercase tracking-[0.5em] font-bold transition-all shadow-2xl flex items-center justify-center gap-3">
                 Checkout <ShoppingBag size={18} strokeWidth={1.5} />
               </button>
             </div>

@@ -22,7 +22,7 @@ export const register = async (data: RegisterRequest): Promise<AuthResponse> => 
 };
 
 export const logout = async (): Promise<void> => {
-    await api.post("/auth/logout")
+    // await api.post("/signout")
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("users");

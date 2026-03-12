@@ -1,5 +1,5 @@
 import { useRoutes } from 'react-router-dom'
-import appRoutes from './routes/index'
+import appRoutes from './routes/user'
 import adminRoutes from './routes/admin'
 
 const App = () => {
