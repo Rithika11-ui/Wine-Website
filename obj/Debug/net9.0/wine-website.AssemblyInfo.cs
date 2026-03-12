@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("wine-website")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d4c5278cce03dd2e980e0f89bb92a644c425d4a1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9d8a118f81cdede593fce5674cda79839d800db4")]
 [assembly: System.Reflection.AssemblyProductAttribute("wine-website")]
 [assembly: System.Reflection.AssemblyTitleAttribute("wine-website")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
