@@ -1,6 +1,8 @@
 import { ReactNode, useEffect, useState } from 'react'
 import { createContext } from 'react'
 import api from '../service/Api'
+import { logout } from '../service/AuthApi';
+import { useNavigate } from 'react-router-dom';
 
 type CartItem = {
     id: string,
@@ -22,10 +24,14 @@ const deliveryfee = 5;
 export const StoreContext = createContext<any>(null);
 
 const StoreContextProvider = ({ children }: { children: ReactNode }) => {
+    const navigate = useNavigate();
     const [cart, setCart] = useState<CartItem[]>([]);
     const [countItem, setCountItem] = useState(0);
     const [products, setProducts] = useState<Product[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    
 
     const url = "http://localhost:5059"
 
@@ -105,6 +111,25 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
         })
     }
 
+    const handleLogout = async () => {
+        setError("");
+        try {
+            setLoading(true);
+            await Promise.all([
+                logout(),
+                new Promise(resolve => (setTimeout(resolve, 300)))
+            ]);
+            // onClose();
+            navigate('/signin');
+            
+        } catch (error) {
+            setError("Logout failed. Please try again.");
+        } finally {
+            setLoading(false)
+        }
+    }
+    
+
     const clearCart = () => setCart([]);
 
     const contextValue = {
@@ -123,6 +148,10 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
         removeProduct,
         clearCart,
         deliveryfee,
+        handleLogout,
+        loading,
+        setError,
+        error,
     }
 
     return (

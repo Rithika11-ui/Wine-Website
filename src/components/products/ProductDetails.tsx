@@ -165,7 +165,7 @@ const ProductDetail = () => {
                 {/* High-Impact Action Row */}
                 <div className="flex gap-4">
                   <Link 
-                    to="/shop/checkout" 
+                    to="/shopping-cart" 
                     className="flex-[3] bg-red-900 text-white py-6 text-[11px] uppercase tracking-[0.4em] font-bold hover:bg-stone-900 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg"
                   >
                     <CreditCard size={18} strokeWidth={1.5} /> 

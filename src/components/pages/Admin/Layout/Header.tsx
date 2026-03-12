@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import {
   Search,
   Bell,
@@ -13,6 +13,8 @@ import {
   LayoutDashboard,
   Sun,
 } from "lucide-react";
+import { logout } from "../../../../service/AuthApi";
+import { StoreContext } from "../../../../Context/StoreContext";
 
 /* ───────────────── Types ───────────────── */
 
@@ -104,38 +106,43 @@ const NotifDropdown = ({ notifications, onMarkAll, onMarkOne }: any) => (
 
 /* ───────────────── User Dropdown ───────────────── */
 
-const UserDropdown = () => (
-  <div className="absolute right-0 top-[calc(100%+14px)] w-[240px] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-xl">
+const UserDropdown = () => {
+  const { error, loading, handleLogout } = useContext(StoreContext);
+  return (
+    
+    <div className="absolute right-0 top-[calc(100%+14px)] w-[240px] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-xl">
 
-    <div className="px-5 py-4 border-b">
-      <p className="text-gray-900 font-semibold text-sm">Admin User</p>
-      <p className="text-xs text-gray-500 mt-1">admin@wineshop.com</p>
-    </div>
+      <div className="px-5 py-4 border-b">
+        <p className="text-gray-900 font-semibold text-sm">Admin User</p>
+        <p className="text-xs text-gray-500 mt-1">admin@wineshop.com</p>
+      </div>
 
-    {[
-      { icon: <LayoutDashboard size={14} />, label: "Dashboard" },
-      { icon: <User size={14} />, label: "Profile" },
-      { icon: <Settings size={14} />, label: "Settings" },
-    ].map((item) => (
+      {[
+        { icon: <LayoutDashboard size={14} />, label: "Dashboard" },
+        { icon: <User size={14} />, label: "Profile" },
+        { icon: <Settings size={14} />, label: "Settings" },
+      ].map((item) => (
+        <button
+          key={item.label}
+          className="flex items-center gap-3 w-full px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition"
+        >
+          {item.icon}
+          {item.label}
+        </button>
+      ))}
+
+      <div className="border-t" />
+
       <button
-        key={item.label}
-        className="flex items-center gap-3 w-full px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition"
-      >
-        {item.icon}
-        {item.label}
+        onClick={handleLogout}
+        className="flex items-center gap-3 w-full px-5 py-3 text-sm text-red-600 hover:bg-red-50 transition">
+        <LogOut size={14} />
+        Sign Out
       </button>
-    ))}
+    </div>
+  )
+};
 
-    <div className="border-t" />
-
-    <button className="flex items-center gap-3 w-full px-5 py-3 text-sm text-red-600 hover:bg-red-50 transition">
-      <LogOut size={14} />
-      Sign Out
-    </button>
-  </div>
-);
-
-/* ───────────────── Main Header ───────────────── */
 
 const AdminHeader = () => {
   const [search, setSearch] = useState("");

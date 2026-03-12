@@ -177,7 +177,7 @@ const Shop = () => {
                           {product.tag}
                         </span>
                       )}
-                      <Link to={`/home/shop/product/${product.id}`}>
+                      <Link to={`/shop/product/${product.id}`}>
                         <img
                           src={product.img}
                           alt={product.name}

@@ -1,36 +1,18 @@
 import { Loader2, LogOut } from 'lucide-react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { logout } from '../../service/AuthApi';
+import { useContext} from 'react';
+import { StoreContext } from '../../Context/StoreContext';
 
 interface SignOutProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const SignOut = ({ isOpen, onClose }: SignOutProps) => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
-
+const SignOut = ({ isOpen, onClose , }: SignOutProps) => {
+  // const navigate = useNavigate();
+  
+  const {error , loading, handleLogout } = useContext(StoreContext);
   if (!isOpen) return null;
 
-  const handleLogout = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      await Promise.all([
-        logout(),
-        new Promise(resolve => setTimeout(resolve, 800))
-      ]);
-      onClose();
-      navigate('/signin');
-    } catch (err: any) {
-      setError("Logout failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
