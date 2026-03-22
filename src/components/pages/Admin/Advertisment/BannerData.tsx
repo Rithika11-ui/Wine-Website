@@ -10,12 +10,14 @@ export interface Banner {
   position: BannerPosition;
   status: BannerStatus;
   mediaType: BannerMediaType;
-  mediaUrl: string;      // real projects: actual URL; here we use gradient placeholder
-  startDate: string;     // ISO date
+  mediaUrl: string;      
+  startDate: string;     
   endDate: string;
   clicks: number;
   impressions: number;
 }
+
+
 
 export const PAGES: BannerPage[] = ["Home", "Shop", "Blog", "About Us", "Contact Us"];
 export const POSITIONS: BannerPosition[] = ["Hero Section", "Top Bar", "Sidebar", "Footer", "Popup", "Mid Page"];

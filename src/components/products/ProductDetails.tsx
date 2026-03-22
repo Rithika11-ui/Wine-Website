@@ -7,7 +7,6 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const { id } = useParams();
 
-  // Find product and ensure we handle missing data gracefully
   const product = products.find((t) => t.id === Number(id));
   
   if (!product) return (

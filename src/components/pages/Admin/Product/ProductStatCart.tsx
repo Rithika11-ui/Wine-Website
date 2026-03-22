@@ -1,6 +1,7 @@
 import React from "react";
 import { Package, CheckCircle, AlertTriangle, FileText, TrendingUp, LucideIcon } from "lucide-react";
-import { products } from "./ProductData";
+import { Product } from "../../Admin/Product/ProductData";
+import { useAdminInventories } from "../../../../Hook/AdminInventories";
 
 interface StatCardProps {
   icon: LucideIcon;
@@ -37,17 +38,19 @@ const StatCard = ({ icon: Icon, label, value, sub, iconColor, iconBg, accent, hi
 );
 
 const ProductStatCards = () => {
-  const total     = products.length;
-  const active    = products.filter(p => p.status === "Active").length;
-  const lowStock  = products.filter(p => p.stock > 0 && p.stock < 10).length;
-  const draft     = products.filter(p => p.status === "Draft").length;
+  const { filtered } = useAdminInventories();
+
+  const total    = filtered.length;
+  const active   = filtered.filter((p: Product) => p.status === "Active").length;
+  const lowStock = filtered.filter((p: Product) => p.stock > 0 && p.stock < 10).length;
+  const draft    = filtered.filter((p: Product) => p.status === "Draft").length;
 
   return (
     <div className="flex gap-5 mb-8">
-      <StatCard icon={Package}       label="Total Products"   value={total}    sub="All Items"      iconColor="text-indigo-500" iconBg="bg-indigo-50"  accent="text-indigo-400" />
-      <StatCard icon={CheckCircle}   label="Active Products"  value={active}   sub="Available"      iconColor="text-emerald-500" iconBg="bg-emerald-50" accent="text-emerald-500" highlight />
-      <StatCard icon={AlertTriangle} label="Low Stock"        value={lowStock} sub="< 10 units"     iconColor="text-amber-500"  iconBg="bg-amber-50"   accent="text-amber-500" />
-      <StatCard icon={FileText}      label="Draft Products"   value={draft}    sub="Pending review" iconColor="text-gray-400"   iconBg="bg-gray-50"    accent="text-gray-400" />
+      <StatCard icon={Package}       label="Total Products"  value={total}    sub="All Items"      iconColor="text-indigo-500"  iconBg="bg-indigo-50"  accent="text-indigo-400"  />
+      <StatCard icon={CheckCircle}   label="Active Products" value={active}   sub="Available"      iconColor="text-emerald-500" iconBg="bg-emerald-50" accent="text-emerald-500" highlight />
+      <StatCard icon={AlertTriangle} label="Low Stock"       value={lowStock} sub="< 10 units"     iconColor="text-amber-500"   iconBg="bg-amber-50"   accent="text-amber-500"   />
+      <StatCard icon={FileText}      label="Draft Products"  value={draft}    sub="Pending review" iconColor="text-gray-400"    iconBg="bg-gray-50"    accent="text-gray-400"    />
     </div>
   );
 };

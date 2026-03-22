@@ -32,14 +32,11 @@ const ProductManagement = () => {
           </button>
         </div>
 
-        {/* ── Stat Cards ── */}
         <ProductStatCards />
 
-        {/* ── Product Table ── */}
         <ProductTable />
       </div>
 
-      {/* ── Add Product Drawer ── */}
       {showForm && (
         <AddProductForm
           onClose={() => setShowForm(false)}

@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useState} from "react";
 import { Users, Search } from "lucide-react";
 import CustomerStatCards from "./CustomerStatCart";
 import CustomerTable from "./CustomerTable";
+import { useAdminUsers } from "../../../../Hook/AdminUser";
+
 
 const ManageCustomers = () => {
   const [search, setSearch] = useState("");
+  const { customers, loading, error } = useAdminUsers();
+  if (loading) return <p className="p-6 text-sm text-gray-400">Loading...</p>;
+  if (error)   return <p className="p-6 text-sm text-rose-400">Error: {error}</p>;
 
   return (
     <div className="min-h-screen bg-[#F4F7FE] font-sans antialiased">
@@ -21,8 +26,6 @@ const ManageCustomers = () => {
               <p className="text-sm text-gray-400">View and manage customer accounts</p>
             </div>
           </div>
-
-          {/* Search pill */}
           <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2.5 shadow-sm w-72">
             <Search size={14} className="text-gray-400 flex-shrink-0" />
             <input
@@ -35,11 +38,8 @@ const ManageCustomers = () => {
           </div>
         </div>
 
-        {/* Stat Cards */}
-        <CustomerStatCards />
-
-        {/* Customer Table */}
-        <CustomerTable />
+        <CustomerStatCards customers={customers} />
+        <CustomerTable customers={customers} search={search} />
 
       </div>
     </div>

@@ -10,7 +10,6 @@ const ManageOrders: React.FC = () => {
     <div className="min-h-screen bg-[#F4F7FE] font-sans antialiased ">
       <div className="max-w-7xl mx-auto  px-8 py-10">
 
-        {/* ── Header ── */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-[#111C44] rounded-2xl flex items-center justify-center shadow-lg">
@@ -30,10 +29,8 @@ const ManageOrders: React.FC = () => {
           </button>
         </div>
 
-        {/* ── Stat Cards ── */}
         <OrderStatCards />
 
-        {/* ── Orders Table ── */}
         <OrderTable key={key} />
 
       </div>

@@ -1,6 +1,7 @@
 import React from "react";
 import { Clock, Truck, CheckCircle, XCircle, TrendingUp, LucideIcon } from "lucide-react";
-import { orders, OrderStatus } from "./OrderData";
+import { OrderStatus } from "./OrderData";
+import { useAdminOrder } from "../../../../Hook/AdminOrders";
 
 const StatCard = ({
   icon: Icon, label, value, sub, iconBg, iconColor, accent,
@@ -25,7 +26,8 @@ const StatCard = ({
 );
 
 const OrderStatCards = () => {
-  const count = (s: OrderStatus) => orders.filter(o => o.status === s).length;
+  const { filtered } = useAdminOrder();
+  const count = (s: OrderStatus) => filtered.filter((o:any) => o.status === s).length;
 
   return (
     <div className="flex gap-5 mb-8">

@@ -1,13 +1,13 @@
-import React, { useState, useMemo } from "react";
+import React from "react";
 import {
   Search, ArrowUpDown, ArrowUp, ArrowDown,
   Eye, Pencil, Trash2, Star, ChevronLeft,
   ChevronRight, Package, Circle,
 } from "lucide-react";
-import { products, CATEGORIES, STATUSES, SORT_OPTIONS, Product, ProductStatus } from "./ProductData";
+import { CATEGORIES, STATUSES, SORT_OPTIONS, ProductStatus } from "./ProductData";
+import { useAdminInventories } from "../../../../Hook/AdminInventories";
 
-type SortKey = "date" | "name" | "price" | "stock" | "rating" | "category";
-type SortDir = "asc" | "desc";
+type SortKey = "date" | "name" | "price" | "rating" | "category";
 
 const statusStyles: Record<ProductStatus, string> = {
   "Active":       "bg-emerald-50 text-emerald-600",
@@ -21,12 +21,6 @@ const statusDot: Record<ProductStatus, string> = {
   "Out of Stock": "fill-rose-400 text-rose-400",
 };
 
-const StockBadge = ({ stock }: { stock: number }) => {
-  if (stock === 0)  return <span className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-500 text-[11px] font-bold">Out</span>;
-  if (stock < 10)   return <span className="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-600 text-[11px] font-bold">{stock} left</span>;
-  return <span className="px-2.5 py-1 rounded-lg bg-gray-50 text-gray-600 text-[11px] font-semibold">{stock}</span>;
-};
-
 const RatingStars = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-1">
     <Star size={12} className="fill-amber-400 text-amber-400" />
@@ -35,19 +29,19 @@ const RatingStars = ({ rating }: { rating: number }) => (
 );
 
 const ProductTable = () => {
-  const [search, setSearch]       = useState("");
-  const [category, setCategory]   = useState("All Categories");
-  const [status, setStatus]       = useState("All Status");
-  const [sortKey, setSortKey]     = useState<SortKey>("date");
-  const [sortDir, setSortDir]     = useState<SortDir>("desc");
-  const [page, setPage]           = useState(1);
-  const perPage = 6;
+  const {
+    loading, error,
+    search, setSearch,
+    category, setCategory,
+    status, setStatus,
+    sortKey, sortDir, setSortDir, handleSort,
+    page, setPage,
+    filtered,
+  } = useAdminInventories();
 
-  const handleSort = (key: SortKey) => {
-    if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
-    else { setSortKey(key); setSortDir("asc"); }
-    setPage(1);
-  };
+  const perPage = 6;
+  const totalPages = Math.ceil(filtered.length / perPage);
+  const paginated  = filtered.slice((page - 1) * perPage, page * perPage);
 
   const SortIcon = ({ col }: { col: SortKey }) => {
     if (sortKey !== col) return <ArrowUpDown size={12} className="opacity-30" />;
@@ -55,32 +49,6 @@ const ProductTable = () => {
       ? <ArrowUp size={12} className="text-[#111C44]" />
       : <ArrowDown size={12} className="text-[#111C44]" />;
   };
-
-  const filtered = useMemo(() => {
-    return products
-      .filter(p => {
-        const q = search.toLowerCase();
-        const matchSearch = p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q);
-        const matchCat    = category === "All Categories" || p.category === category;
-        const matchStatus = status === "All Status" || p.status === status;
-        return matchSearch && matchCat && matchStatus;
-      })
-      .sort((a, b) => {
-        let cmp = 0;
-        switch (sortKey) {
-          case "name":     cmp = a.name.localeCompare(b.name); break;
-          case "price":    cmp = a.price - b.price; break;
-          case "stock":    cmp = a.stock - b.stock; break;
-          case "rating":   cmp = a.rating - b.rating; break;
-          case "category": cmp = a.category.localeCompare(b.category); break;
-          case "date":     cmp = new Date(a.addedDate).getTime() - new Date(b.addedDate).getTime(); break;
-        }
-        return sortDir === "asc" ? cmp : -cmp;
-      });
-  }, [search, category, status, sortKey, sortDir]);
-
-  const totalPages = Math.ceil(filtered.length / perPage);
-  const paginated  = filtered.slice((page - 1) * perPage, page * perPage);
 
   const ColHeader = ({ label, col }: { label: string; col?: SortKey }) => (
     <th className="px-5 py-3 text-left">
@@ -94,24 +62,24 @@ const ProductTable = () => {
     </th>
   );
 
+  if (loading) return <p className="p-6 text-sm text-gray-400">Loading...</p>;
+  if (error)   return <p className="p-6 text-sm text-rose-400">Error: {error}</p>;
+
   return (
     <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(0,0,0,0.06)] border border-gray-100 overflow-hidden">
 
       {/* ── Toolbar ── */}
       <div className="flex flex-wrap items-center gap-3 px-6 py-4 border-b border-gray-100">
-        {/* Search */}
         <div className="flex items-center gap-2 bg-[#F4F7FE] rounded-xl px-3 py-2.5 flex-1 min-w-48">
           <Search size={14} className="text-gray-400 flex-shrink-0" />
           <input
             type="text"
-            placeholder="Search by name, SKU or description"
+            placeholder="Search by name or description"
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             className="bg-transparent text-xs text-gray-700 placeholder:text-gray-400 outline-none w-full"
           />
         </div>
-
-        {/* Category */}
         <select
           value={category}
           onChange={e => { setCategory(e.target.value); setPage(1); }}
@@ -119,8 +87,6 @@ const ProductTable = () => {
         >
           {CATEGORIES.map(c => <option key={c}>{c}</option>)}
         </select>
-
-        {/* Status */}
         <select
           value={status}
           onChange={e => { setStatus(e.target.value); setPage(1); }}
@@ -128,21 +94,16 @@ const ProductTable = () => {
         >
           {STATUSES.map(s => <option key={s}>{s}</option>)}
         </select>
-
-        {/* Sort */}
         <select
           value={sortKey}
-          onChange={e => { setSortKey(e.target.value as SortKey); setPage(1); }}
+          onChange={e => { handleSort(e.target.value as SortKey); setPage(1); }}
           className="border border-gray-200 rounded-xl px-3 py-2.5 text-xs text-gray-600 bg-white outline-none focus:border-[#111C44] transition-all cursor-pointer"
         >
           {SORT_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
-
-        {/* Sort direction toggle */}
         <button
           onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")}
           className="w-10 h-10 flex items-center justify-center rounded-xl border border-gray-200 text-gray-400 hover:border-[#111C44] hover:text-[#111C44] transition-all"
-          title={`Direction: ${sortDir === "asc" ? "Ascending" : "Descending"}`}
         >
           {sortDir === "asc" ? <ArrowUp size={15} /> : <ArrowDown size={15} />}
         </button>
@@ -157,7 +118,6 @@ const ProductTable = () => {
               <ColHeader label="Price"        col="price"    />
               <ColHeader label="Category"     col="category" />
               <ColHeader label="Added Date"   col="date"     />
-              <ColHeader label="Stock"        col="stock"    />
               <ColHeader label="Status"                      />
               <ColHeader label="Rating"       col="rating"   />
               <ColHeader label="Actions"                     />
@@ -166,7 +126,7 @@ const ProductTable = () => {
           <tbody>
             {paginated.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-6 py-16 text-center">
+                <td colSpan={7} className="px-6 py-16 text-center">
                   <div className="flex flex-col items-center gap-3 text-gray-300">
                     <Package size={36} />
                     <p className="text-sm font-medium text-gray-400">No products found</p>
@@ -181,12 +141,15 @@ const ProductTable = () => {
                   {/* Product Name */}
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-lg flex-shrink-0 group-hover:border-indigo-100 transition-colors">
-                        {product.image}
+                      <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden group-hover:border-indigo-100 transition-colors">
+                        {product.image
+                          ? <img src={product.image} alt={product.name} className="w-full h-full object-cover rounded-xl" />
+                          : <span className="text-lg">🍷</span>
+                        }
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-[#1B1E2B] leading-tight">{product.name}</p>
-                        <p className="text-[10px] text-gray-400 font-mono mt-0.5">{product.sku}</p>
+                        <p className="text-[10px] text-gray-400 mt-0.5">{product.volume}ml · {product.alcohol}%</p>
                       </div>
                     </div>
                   </td>
@@ -199,20 +162,15 @@ const ProductTable = () => {
                   {/* Category */}
                   <td className="px-5 py-4">
                     <span className="px-3 py-1 bg-indigo-50 text-indigo-600 text-[11px] font-semibold rounded-lg">
-                      {product.category}
+                      {product.categoryId}
                     </span>
                   </td>
 
                   {/* Date */}
                   <td className="px-5 py-4">
                     <span className="text-xs text-gray-500">
-                      {new Date(product.addedDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {new Date(product.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                     </span>
-                  </td>
-
-                  {/* Stock */}
-                  <td className="px-5 py-4">
-                    <StockBadge stock={product.stock} />
                   </td>
 
                   {/* Status */}
@@ -252,8 +210,11 @@ const ProductTable = () => {
       {/* ── Pagination ── */}
       <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
         <p className="text-[11px] text-gray-400">
-          Showing <span className="font-semibold text-gray-600">{Math.min((page - 1) * perPage + 1, filtered.length)}–{Math.min(page * perPage, filtered.length)}</span> of{" "}
-          <span className="font-semibold text-gray-600">{filtered.length}</span> products
+          Showing{" "}
+          <span className="font-semibold text-gray-600">
+            {Math.min((page - 1) * perPage + 1, filtered.length)}–{Math.min(page * perPage, filtered.length)}
+          </span>{" "}
+          of <span className="font-semibold text-gray-600">{filtered.length}</span> products
         </p>
         <div className="flex items-center gap-2">
           <button
@@ -267,9 +228,7 @@ const ProductTable = () => {
             <button
               key={p}
               onClick={() => setPage(p)}
-              className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${
-                p === page ? "bg-[#111C44] text-white" : "border border-gray-200 text-gray-400 hover:border-gray-300"
-              }`}
+              className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${p === page ? "bg-[#111C44] text-white" : "border border-gray-200 text-gray-400 hover:border-gray-300"}`}
             >
               {p}
             </button>

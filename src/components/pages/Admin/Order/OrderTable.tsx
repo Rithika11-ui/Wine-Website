@@ -1,45 +1,34 @@
-import React, { useState, useMemo } from "react";
+import React from "react";
 import {
   Search, Eye, Trash2, Circle,
-  ChevronLeft, ChevronRight, ShoppingBag,
-  ArrowUpDown, RotateCcw
+  ChevronLeft, ChevronRight, ShoppingBag, ArrowUpDown,
 } from "lucide-react";
-import { orders as initialOrders, OrderStatus, STATUS_CONFIG, AVATAR_COLORS, Order } from "./OrderData";
+import { OrderStatus, STATUS_CONFIG, AVATAR_COLORS } from "./OrderData";
+import { useAdminOrder, FilterStatus } from "../../../../Hook/AdminOrders";
 import OrderDetail from "./OrderDetail";
 
-type FilterStatus = "All Orders" | OrderStatus;
+
 
 const OrderTable = () => {
-  const [orderList, setOrderList]   = useState<Order[]>(initialOrders);
-  const [search, setSearch]         = useState("");
-  const [statusFilter, setStatus]   = useState<FilterStatus>("All Orders");
-  const [selected, setSelected]     = useState<Order | null>(null);
-  const [page, setPage]             = useState(1);
-  const perPage = 5;
+  const {
+    loading, error,
+    search, setSearch,
+    statusFilter, setStatus,
+    selected, setSelected,
+    page, setPage,
+    filtered,
+    handleStatusChange,
+    handleDelete,
+  } = useAdminOrder();
 
-  const filtered = useMemo(() => {
-    return orderList.filter(o => {
-      const q = search.toLowerCase();
-      const matchSearch = o.id.toLowerCase().includes(q) || o.customer.toLowerCase().includes(q) || o.email.toLowerCase().includes(q);
-      const matchStatus = statusFilter === "All Orders" || o.status === statusFilter;
-      return matchSearch && matchStatus;
-    });
-  }, [orderList, search, statusFilter]);
-
+  const perPage    = 5;
   const totalPages = Math.ceil(filtered.length / perPage);
   const paginated  = filtered.slice((page - 1) * perPage, page * perPage);
 
-  const handleStatusChange = (id: string, status: OrderStatus) => {
-    setOrderList(prev => prev.map(o => o.id === id ? { ...o, status } : o));
-    setSelected(prev => prev?.id === id ? { ...prev, status } : prev);
-  };
-
-  const handleDelete = (id: string) => {
-    setOrderList(prev => prev.filter(o => o.id !== id));
-    setSelected(null);
-  };
-
   const filters: FilterStatus[] = ["All Orders", "Pending", "In Progress", "Completed", "Cancelled"];
+
+  if (loading) return <p className="p-6 text-sm text-gray-400">Loading...</p>;
+  if (error)   return <p className="p-6 text-sm text-rose-400">Error: {error}</p>;
 
   return (
     <>
@@ -47,7 +36,6 @@ const OrderTable = () => {
 
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3 px-6 py-4 border-b border-gray-100">
-          {/* Search */}
           <div className="flex items-center gap-2 bg-[#F4F7FE] rounded-xl px-3 py-2.5 flex-1 min-w-52">
             <Search size={13} className="text-gray-400 flex-shrink-0" />
             <input
@@ -59,19 +47,29 @@ const OrderTable = () => {
             />
           </div>
 
-          {/* Status filter tabs */}
           <div className="flex items-center gap-1.5 flex-wrap">
             {filters.map(f => {
-              const cfg = f !== "All Orders" ? STATUS_CONFIG[f as OrderStatus] : null;
+              const isAll = f === "All Orders";
+              const cfg   = !isAll ? STATUS_CONFIG[f as OrderStatus] : undefined;
+              const isActive = statusFilter === f;
               return (
-                <button key={f} onClick={() => { setStatus(f); setPage(1); }}
+                <button
+                  key={f}
+                  onClick={() => { setStatus(f); setPage(1); }}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-semibold transition-all ${
-                    statusFilter === f
-                      ? f === "All Orders" ? "bg-[#111C44] text-white" : `${cfg!.bg} text-white`
+                    isActive
+                      ? isAll
+                        ? "bg-[#111C44] text-white"
+                        : `${cfg!.bg} text-white`
                       : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                   }`}
                 >
-                  {cfg && <Circle size={5} className={statusFilter === f ? "fill-white text-white" : cfg.dot} />}
+                  {cfg && (
+                    <Circle
+                      size={5}
+                      className={isActive ? "fill-white text-white" : cfg.dot}
+                    />
+                  )}
                   {f}
                 </button>
               );
@@ -99,6 +97,7 @@ const OrderTable = () => {
             </thead>
             <tbody>
               {paginated.length === 0 ? (
+                
                 <tr>
                   <td colSpan={7} className="py-20 text-center">
                     <div className="flex flex-col items-center gap-3 text-gray-300">
@@ -110,7 +109,7 @@ const OrderTable = () => {
                 </tr>
               ) : (
                 paginated.map((order, i) => {
-                  const cfg = STATUS_CONFIG[order.status];
+                  const cfg    = STATUS_CONFIG[order.status] ?? STATUS_CONFIG["Pending"];
                   const absIdx = (page - 1) * perPage + i;
                   return (
                     <tr key={order.id} className="border-b border-gray-50 hover:bg-[#F8F9FF] transition-colors group">
@@ -142,7 +141,7 @@ const OrderTable = () => {
 
                       {/* Total */}
                       <td className="px-5 py-4">
-                        <span className="text-xs font-bold text-[#1B1E2B]">${order.total.toLocaleString()}</span>
+                        <span className="text-xs font-bold text-[#1B1E2B]">${order.total.toString()}</span>
                       </td>
 
                       {/* Date */}
@@ -152,10 +151,10 @@ const OrderTable = () => {
                         </span>
                       </td>
 
-                      {/* Status */}
+                      {/* Status — FIXED: added badge content and closing </td> */}
                       <td className="px-5 py-4">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${cfg.light} ${cfg.text}`}>
-                          <Circle size={5} className={cfg.dot} />
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold ${cfg.bg} ${cfg.text}`}>
+                          <Circle size={5} className={`${cfg.dot} fill-current`} />
                           {order.status}
                         </span>
                       </td>
@@ -184,21 +183,24 @@ const OrderTable = () => {
         {/* Pagination */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
           <p className="text-[11px] text-gray-400">
-            Showing <span className="font-semibold text-gray-600">{Math.min((page-1)*perPage+1, filtered.length)}–{Math.min(page*perPage, filtered.length)}</span> of{" "}
-            <span className="font-semibold text-gray-600">{filtered.length}</span> orders
+            Showing{" "}
+            <span className="font-semibold text-gray-600">
+              {Math.min((page - 1) * perPage + 1, filtered.length)}–{Math.min(page * perPage, filtered.length)}
+            </span>{" "}
+            of <span className="font-semibold text-gray-600">{filtered.length}</span> orders
           </p>
           <div className="flex items-center gap-2">
-            <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page===1}
+            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
               className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:border-gray-300 disabled:opacity-30 transition-all">
               <ChevronLeft size={14} />
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i+1).map(p => (
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
               <button key={p} onClick={() => setPage(p)}
-                className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${p===page ? "bg-[#111C44] text-white" : "border border-gray-200 text-gray-400 hover:border-gray-300"}`}>
+                className={`w-8 h-8 rounded-lg text-xs font-semibold transition-all ${p === page ? "bg-[#111C44] text-white" : "border border-gray-200 text-gray-400 hover:border-gray-300"}`}>
                 {p}
               </button>
             ))}
-            <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page===totalPages}
+            <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}
               className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:border-gray-300 disabled:opacity-30 transition-all">
               <ChevronRight size={14} />
             </button>
@@ -206,7 +208,6 @@ const OrderTable = () => {
         </div>
       </div>
 
-      {/* Order detail modal */}
       {selected && (
         <OrderDetail
           order={selected}

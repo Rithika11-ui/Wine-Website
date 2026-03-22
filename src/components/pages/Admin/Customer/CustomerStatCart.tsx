@@ -1,6 +1,6 @@
 import React from "react";
 import { Users, UserCheck, ShoppingBag, DollarSign, TrendingUp, LucideIcon } from "lucide-react";
-import { customers } from "./CustomerData";
+import { Customer } from "./CustomerData";
 
 interface StatCardProps {
   icon: LucideIcon;
@@ -29,10 +29,10 @@ const StatCard = ({ icon: Icon, label, value, sub, color, bg }: StatCardProps) =
   </div>
 );
 
-const CustomerStatCards = () => {
+const CustomerStatCards = ({ customers }: { customers: Customer[] }) => {
   const totalRevenue = customers.reduce((sum, c) => {
     const num = parseFloat(c.revenue.replace(/[$,]/g, ""));
-    return sum + num;
+    return sum + (isNaN(num) ? 0 : num);
   }, 0);
 
   const totalOrders = customers.reduce((s, c) => s + c.orders, 0);
@@ -40,38 +40,10 @@ const CustomerStatCards = () => {
 
   return (
     <div className="flex gap-5 mb-8">
-      <StatCard
-        icon={Users}
-        label="Total Customers"
-        value={String(customers.length)}
-        sub="All Users"
-        color="text-indigo-500"
-        bg="bg-indigo-50"
-      />
-      <StatCard
-        icon={UserCheck}
-        label="Active Members"
-        value={String(activeCount)}
-        sub="Last 30 Days"
-        color="text-emerald-500"
-        bg="bg-emerald-50"
-      />
-      <StatCard
-        icon={ShoppingBag}
-        label="Total Orders"
-        value={String(totalOrders)}
-        sub="All Time"
-        color="text-amber-500"
-        bg="bg-amber-50"
-      />
-      <StatCard
-        icon={DollarSign}
-        label="Total Revenue"
-        value={`$${totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
-        sub="Earned"
-        color="text-violet-500"
-        bg="bg-violet-50"
-      />
+      <StatCard icon={Users}       label="Total Customers" value={String(customers.length)}  sub="All Users"    color="text-indigo-500"  bg="bg-indigo-50" />
+      <StatCard icon={UserCheck}   label="Active Members"  value={String(activeCount)}       sub="Last 30 Days" color="text-emerald-500" bg="bg-emerald-50" />
+      <StatCard icon={ShoppingBag} label="Total Orders"    value={String(totalOrders)}       sub="All Time"     color="text-amber-500"   bg="bg-amber-50" />
+      <StatCard icon={DollarSign}  label="Total Revenue"   value={`$${totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2 })}`} sub="Earned" color="text-violet-500" bg="bg-violet-50" />
     </div>
   );
 };

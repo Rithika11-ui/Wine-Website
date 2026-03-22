@@ -1,49 +1,16 @@
-import React, { useState, useRef } from 'react'
+import React from 'react'
 import {
   Megaphone, Plus, Pencil, Trash2, Search, X,
-  CheckCircle, XCircle, Eye, Calendar, Image, Link as LinkIcon, TrendingUp
+  CheckCircle, Eye, Calendar, Image, Link as LinkIcon, TrendingUp,
+  XCircle
 } from 'lucide-react'
+import { Advertisement, Placement, Status, useAdminAdvertisment } from '../../../../Hook/Advertisment/AdminAdvertisment'
 
-type Status = 'Active' | 'Inactive' | 'Scheduled'
-type Placement = 'Homepage Banner' | 'Sidebar' | 'Popup' | 'Product Page'
 
-interface Ad {
-  id: number
-  title: string
-  placement: Placement
-  link: string
-  startDate: string
-  endDate: string
-  status: Status
-  impressions: number
-  image: string   // base64 or url
-}
-
-const PLACEMENTS: Placement[] = ['Homepage Banner', 'Sidebar', 'Popup', 'Product Page']
-
-const INITIAL_ADS: Ad[] = [
-  { id: 1, title: 'Summer Red Wine Sale',     placement: 'Homepage Banner', link: '/promo/summer',   startDate: '2024-06-01', endDate: '2024-06-30', status: 'Active',    impressions: 8420,  image: 'https://images.vivino.com/thumbs/ApnIiXjcT5Kc33OHgNb9dA_pb_x600.png' },
-  { id: 2, title: 'New Arrivals – Rosé',      placement: 'Sidebar',         link: '/new-arrivals',   startDate: '2024-06-10', endDate: '2024-07-10', status: 'Active',    impressions: 3150,  image: 'https://images.vivino.com/thumbs/uQ3SFsHRSj4HFGLDGBhcpA_pb_x600.png' },
-  { id: 3, title: 'Members Only Discount',    placement: 'Popup',           link: '/members',        startDate: '2024-07-01', endDate: '2024-07-15', status: 'Scheduled', impressions: 0,     image: 'https://images.vivino.com/thumbs/frOLMk-HmBRnCVpB4xOmSA_pb_x600.png' },
-  { id: 4, title: 'Sparkling Collection',     placement: 'Product Page',    link: '/sparkling',      startDate: '2024-05-01', endDate: '2024-05-31', status: 'Inactive',  impressions: 12300, image: 'https://images.vivino.com/thumbs/Rr00AxTuSMRIjQ-BKQ16xg_pb_x600.png' },
-  { id: 5, title: 'Flash Sale – 20% Off',     placement: 'Homepage Banner', link: '/flash-sale',     startDate: '2024-06-20', endDate: '2024-06-21', status: 'Scheduled', impressions: 0,     image: 'https://images.vivino.com/thumbs/uQ3SFsHRSj4HFGLDGBhcpA_pb_x600.png' },
-]
-
-const EMPTY_FORM = {
-  title: '', placement: 'Homepage Banner' as Placement,
-  link: '', startDate: '', endDate: '',
-  status: 'Active' as Status, image: ''
-}
-
-const STATUS_STYLES: Record<Status, string> = {
-  Active:    'bg-emerald-50 text-emerald-600',
-  Inactive:  'bg-red-50 text-red-400',
-  Scheduled: 'bg-amber-50 text-amber-500',
-}
-const STATUS_ICONS: Record<Status, React.ReactNode> = {
-  Active:    <CheckCircle size={12} />,
-  Inactive:  <XCircle size={12} />,
-  Scheduled: <Calendar size={12} />,
+export const STATUS_ICONS: Record<Status, React.ReactNode> = {
+  Active:    <CheckCircle size={11} />,
+  Inactive:  <XCircle size={11} />,
+  Scheduled: <Calendar size={11} />,
 }
 
 const StatCard = ({ label, value, icon, color }: { label: string; value: string | number; icon: React.ReactNode; color: string }) => (
@@ -59,54 +26,14 @@ const StatCard = ({ label, value, icon, color }: { label: string; value: string 
 )
 
 export default function ManageAdvertisement() {
-  const [ads, setAds] = useState<Ad[]>(INITIAL_ADS)
-  const [search, setSearch] = useState('')
-  const [filterStatus, setFilterStatus] = useState<Status | 'All'>('All')
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editTarget, setEditTarget] = useState<Ad | null>(null)
-  const [form, setForm] = useState(EMPTY_FORM)
-  const [deleteId, setDeleteId] = useState<number | null>(null)
-  const [previewAd, setPreviewAd] = useState<Ad | null>(null)
-  const fileRef = useRef<HTMLInputElement>(null)
+  
+  const { ad, ads, openAdd, openEdit, setDeleteId, activeCount, scheduledCount,
+    totalImpressions, search, setSearch, setFilterStatus, filterStatus, filtered,
+    STATUS_ICONS, setPreviewAd, modalOpen, editTarget, closeModal, fileRef, form, setForm,
+    PLACEMENTS, handleSave, previewAd, deleteId, handleDelete, STATUS_STYLES, handleImageUpload
+  } = useAdminAdvertisment();
 
-  const filtered = ads.filter(a => {
-    const matchSearch = a.title.toLowerCase().includes(search.toLowerCase()) ||
-      a.placement.toLowerCase().includes(search.toLowerCase())
-    const matchStatus = filterStatus === 'All' || a.status === filterStatus
-    return matchSearch && matchStatus
-  })
-
-  const openAdd = () => { setEditTarget(null); setForm(EMPTY_FORM); setModalOpen(true) }
-  const openEdit = (ad: Ad) => {
-    setEditTarget(ad)
-    setForm({ title: ad.title, placement: ad.placement, link: ad.link, startDate: ad.startDate, endDate: ad.endDate, status: ad.status, image: ad.image })
-    setModalOpen(true)
-  }
-  const closeModal = () => { setModalOpen(false); setEditTarget(null) }
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => setForm(f => ({ ...f, image: reader.result as string }))
-    reader.readAsDataURL(file)
-  }
-
-  const handleSave = () => {
-    if (!form.title.trim()) return
-    if (editTarget) {
-      setAds(prev => prev.map(a => a.id === editTarget.id ? { ...a, ...form } : a))
-    } else {
-      setAds(prev => [...prev, { id: Date.now(), ...form, impressions: 0 }])
-    }
-    closeModal()
-  }
-
-  const handleDelete = (id: number) => { setAds(prev => prev.filter(a => a.id !== id)); setDeleteId(null) }
-
-  const totalImpressions = ads.reduce((s, a) => s + a.impressions, 0)
-  const activeCount = ads.filter(a => a.status === 'Active').length
-  const scheduledCount = ads.filter(a => a.status === 'Scheduled').length
+ 
 
   return (
     <div className="min-h-screen bg-[#F4F7FE]  ">
@@ -175,7 +102,7 @@ export default function ManageAdvertisement() {
             <tbody className="divide-y divide-gray-50">
               {filtered.length === 0 ? (
                 <tr><td colSpan={7} className="px-6 py-16 text-center text-gray-400 text-sm">No advertisements found.</td></tr>
-              ) : filtered.map((ad, i) => (
+              ) : filtered.map((ad: Advertisement, i: number) => (
                 <tr key={ad.id} className="hover:bg-gray-50/60 transition-colors">
                   <td className="px-6 py-4 text-gray-400 text-xs">{String(i + 1).padStart(2, '0')}</td>
 
@@ -268,7 +195,7 @@ export default function ManageAdvertisement() {
               <div>
                 <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Title <span className="text-red-400">*</span></label>
                 <input type="text" placeholder="e.g. Summer Red Wine Sale"
-                  value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+                  value={form.title} onChange={e => setForm((f:any) => ({ ...f, title: e.target.value }))}
                   className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#580C1F]/30 focus:border-[#580C1F]" />
               </div>
 
@@ -278,7 +205,7 @@ export default function ManageAdvertisement() {
                 <div className="relative">
                   <LinkIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input type="text" placeholder="/promo/summer-sale"
-                    value={form.link} onChange={e => setForm(f => ({ ...f, link: e.target.value }))}
+                    value={form.link} onChange={e => setForm((f:any) => ({ ...f, link: e.target.value }))}
                     className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#580C1F]/30 focus:border-[#580C1F]" />
                 </div>
               </div>
@@ -287,14 +214,14 @@ export default function ManageAdvertisement() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Placement</label>
-                  <select value={form.placement} onChange={e => setForm(f => ({ ...f, placement: e.target.value as Placement }))}
+                  <select value={form.placement} onChange={e => setForm((f:any) => ({ ...f, placement: e.target.value as Placement }))}
                     className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#580C1F]/30 focus:border-[#580C1F] bg-white">
-                    {PLACEMENTS.map(p => <option key={p}>{p}</option>)}
+                    {PLACEMENTS.map((p:any) => <option key={p}>{p}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Status</label>
-                  <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value as Status }))}
+                  <select value={form.status} onChange={e => setForm((f:any) => ({ ...f, status: e.target.value as Status }))}
                     className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#580C1F]/30 focus:border-[#580C1F] bg-white">
                     <option>Active</option><option>Inactive</option><option>Scheduled</option>
                   </select>
@@ -305,12 +232,12 @@ export default function ManageAdvertisement() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">Start Date</label>
-                  <input type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
+                  <input type="date" value={form.startDate} onChange={e => setForm((f:any) => ({ ...f, startDate: e.target.value }))}
                     className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#580C1F]/30 focus:border-[#580C1F]" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-1.5">End Date</label>
-                  <input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))}
+                  <input type="date" value={form.endDate} onChange={e => setForm((f:any) => ({ ...f, endDate: e.target.value }))}
                     className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#580C1F]/30 focus:border-[#580C1F]" />
                 </div>
               </div>
