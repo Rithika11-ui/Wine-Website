@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("/[controller]")]
 public class OrdersController : ControllerBase
 {
     private readonly IOrderService _orderService;
@@ -13,7 +13,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
-    // [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAll()
     {
         try
@@ -46,7 +46,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    // [Authorize]
+    [Authorize]
     public async Task<IActionResult> GetById(string id)
     {
         try

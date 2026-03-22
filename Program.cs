@@ -1,5 +1,4 @@
 using System.Text;
-using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Microsoft.AspNetCore.Authentication.JwtBearer; 
 using Microsoft.IdentityModel.Tokens;
@@ -68,6 +67,7 @@ builder.Services.AddSingleton<IProductService, ProductService>();
 builder.Services.AddSingleton<IOrderService, OrderService>();
 builder.Services.AddSingleton<IPaymentService, PaymentService>();
 builder.Services.AddSingleton<ICategoryService, CategoryService>();
+builder.Services.AddSingleton<IRewardService, RewardService>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("")]
+[Route("/[controller]")]
 public class UsersController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -77,7 +77,7 @@ public class UsersController : ControllerBase
 
     [HttpPut("{id}")]
     [Authorize]
-    public async Task<IActionResult> UpdateUser(string id, UpdateUserDto dto)
+    public async Task<IActionResult> UpdateUser(string id, [FromBody]  UpdateUserDto dto)
     {
         try
         {

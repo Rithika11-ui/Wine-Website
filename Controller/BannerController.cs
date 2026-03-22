@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("api/banner")]
+[Route("/[controller]")]
 public class BannerController : ControllerBase
 {
     private readonly IBannerService _bannerService;

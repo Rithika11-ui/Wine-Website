@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("/[controller]")]
 public class CategoriesController : ControllerBase
 {
     private readonly ICategoryService _categoryService;
@@ -13,6 +13,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAll()
     {
         try
@@ -44,6 +45,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetById(string id)
     {
         try
@@ -68,6 +70,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(CreateCategoryDto dto)
     {
         try
@@ -81,7 +84,7 @@ public class CategoriesController : ControllerBase
                 Region = dto.Region
             };
 
-            await _categoryService.CreateAsync(category); // ✅ Create one
+            await _categoryService.CreateAsync(category); 
 
             return CreatedAtAction(nameof(GetById), new { id = category.Id }, new
             {
@@ -97,7 +100,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    // [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(string id, UpdateCategoryDto dto)
     {
         try
@@ -120,7 +123,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    // [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(string id)
     {
         try
