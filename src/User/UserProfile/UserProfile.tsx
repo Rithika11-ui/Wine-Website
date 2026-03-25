@@ -1,12 +1,16 @@
 import { User, Lock, MapPin, Bell, Wine, ChevronRight, Camera, Settings, LogOut } from 'lucide-react';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import SignOut from './Signout';
 import { useNavigate } from 'react-router-dom';
+import { StoreContext } from '../../Context/StoreContext';
 
 
 const UserAccount = () => {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { user } = useContext(StoreContext);
+
+  if (!user) return <p>Loading...</p>;
 
   return (
     <div className="bg-[#FDFCF8] h-screen font-sans text-stone-900">
@@ -33,27 +37,27 @@ const UserAccount = () => {
                 </button>
               </div>
               <div className="space-y-1">
-                <h2 className="text-2xl font-serif italic">Alexander Vane</h2>
-                <p className="text-sm text-stone-400 font-light">Member since October 2024</p>
+                <h2 className="text-2xl font-serif italic">{user.userName}</h2>
+                <p className="text-sm text-stone-400 font-light">Member since {new Date(user.createdAt).getFullYear()}</p>
               </div>
             </div>
 
             <form className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">First Name</label>
-                <input type="text" defaultValue="Alexander" className="w-full border-b border-stone-100 py-2 outline-none focus:border-red-900 bg-transparent text-sm" />
+                <label className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Username</label> 
+                <input type="text" defaultValue={user.userName} className="w-full border-b border-stone-100 py-2 outline-none focus:border-red-900 bg-transparent text-sm" /> 
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Last Name</label>
-                <input type="text" defaultValue="Vane" className="w-full border-b border-stone-100 py-2 outline-none focus:border-red-900 bg-transparent text-sm" />
+                <label className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Phone Number</label> 
+                <input type="tel" defaultValue={user.phoneNumber} className="w-full border-b border-stone-100 py-2 outline-none focus:border-red-900 bg-transparent text-sm" /> 
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Email Address</label>
-                <input type="email" defaultValue="alex.vane@heritage.com" className="w-full border-b border-stone-100 py-2 outline-none focus:border-red-900 bg-transparent text-sm" />
+                <label className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Email</label> 
+                <input type="email" defaultValue={user.email} className="w-full border-b border-stone-100 py-2 outline-none focus:border-red-900 bg-transparent text-sm" /> 
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Phone Number</label>
-                <input type="tel" defaultValue="+1 (555) 000-1212" className="w-full border-b border-stone-100 py-2 outline-none focus:border-red-900 bg-transparent text-sm" />
+                <label className="text-[9px] uppercase tracking-widest text-stone-400 font-bold">Address</label> 
+                <input type="text" defaultValue={user.address} className="w-full border-b border-stone-100 py-2 outline-none focus:border-red-900 bg-transparent text-sm" /> 
               </div>
               <div className="md:col-span-2 pt-4">
                 <button className="bg-stone-900 text-white px-10 py-4 text-[10px] uppercase tracking-widest font-bold hover:bg-red-900 transition-all shadow-lg">

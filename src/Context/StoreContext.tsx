@@ -1,7 +1,7 @@
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { createContext } from 'react'
 import api from '../service/Api'
-import { logout } from '../service/AuthApi';
+import { getCurrentUser, logout } from '../service/AuthApi';
 import { useNavigate } from 'react-router-dom';
 
 type CartItem = {
@@ -21,95 +21,93 @@ type Product = {
 
 const deliveryfee = 5;
 
+const ENDPOINTS = [
+    { path: "/products", setter: "setProducts" },
+    // { path: "/orders",   setter: "setBlogs" },
+    // { path: "/users/me", setter: "setUser" },
+    // { path: "/payments", setter: "setUser" },
+];
+
 export const StoreContext = createContext<any>(null);
 
 const StoreContextProvider = ({ children }: { children: ReactNode }) => {
     const navigate = useNavigate();
-    const [cart, setCart] = useState<CartItem[]>([]);
+
+    const [cart,      setCart]      = useState<CartItem[]>([]);
     const [countItem, setCountItem] = useState(0);
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loadingProducts, setLoadingProducts] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    
+    const [loading,   setLoading]   = useState(false);
+    const [error,     setError]     = useState("");
+    const [products,  setProducts]  = useState<Product[]>([]);
+    const [blogs,     setBlogs]     = useState([]);
+    const [user, setUser] = useState(() => getCurrentUser());
+    console.log("user:", user);
 
-    const url = "http://localhost:5059"
+    const url = process.env.REACT_APP_API_URL;
 
-    // Fetch products only when logged in
+    const setters = useMemo<Record<string, (data: any) => void>>(() => ({
+        setProducts,
+        setBlogs,
+        setUser,
+    }), []);
+
     useEffect(() => {
-        const fetchProducts = async () => {
+        const fetchAll = async () => {
             const token = localStorage.getItem("token");
-            if (!token || token === "undefined") return; // don't fetch if not logged in
+            if (!token || token === "undefined") return;
 
-            setLoadingProducts(true);
+            setLoading(true);
             try {
-                const res = await api.get("/products");
-                setProducts(res.data.data); // backend returns { success, message, data: [...] }
+                const responses = await Promise.all(
+                    ENDPOINTS.map(({ path }) => api.get(path))
+                );
+                responses.forEach((res, i) => {
+                    setters[ENDPOINTS[i].setter](res.data.data);
+                });
             } catch (error) {
-                console.error("Failed to fetch products", error);
+                console.error("Failed to fetch", error);
             } finally {
-                setLoadingProducts(false);
+                setLoading(false);
             }
         };
-        fetchProducts();
-    }, []);
+        fetchAll();
+    }, [setters]);
 
-    // Save cart to localStorage
     useEffect(() => {
         localStorage.setItem("cart", JSON.stringify(cart));
     }, [cart]);
 
-    const addCount = () => {
-        setCountItem((prev) => prev + 1);
-    }
+    const addCount    = () => setCountItem((prev) => prev + 1);
+    const removeCount = () => setCountItem((prev) => prev - 1);
 
-    const removeCount = () => {
-        setCountItem((prev) => prev - 1);
-    }
-
-    const subTotal = cart.reduce((sum, item) => {
-        return sum + item.price * item.quantity;
-    }, 0)
+    const subTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     const addToCart = (product: CartItem) => {
         setCart((prev) => {
-            const exists = prev.find((item: any) => item.id === product.id);
-            if (!exists) {
-                return [...prev, { ...product, quantity: 1 }];
-            }
-            return prev.map((item: any) =>
-                item.id === product.id
-                    ? { ...item, quantity: item.quantity + 1 }
-                    : item
-            );
-        });
-    }
-
-    const updateProduct = (updatedProduct: CartItem) => {
-        setCart((prev) => {
-            const exist = prev.find(item => item.id === updatedProduct.id);
-            if (!exist) {
-                console.error("Product Not Found");
-                return prev;
-            }
-            return prev.map(item =>
-                item.id === updatedProduct.id
-                    ? { ...item, ...updatedProduct }
-                    : item
+            const exists = prev.find((item) => item.id === product.id);
+            if (!exists) return [...prev, { ...product, quantity: 1 }];
+            return prev.map((item) =>
+                item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
             );
         });
     };
 
-    const removeProduct = (removeProduct: CartItem) => {
+    const updateProduct = (updatedProduct: CartItem) => {
         setCart((prev) => {
-            const exists = prev.find((item) => item.id === removeProduct.id)
-            if (!exists) {
-                console.error("Product Not Found");
-                return prev;
-            }
-            return prev.filter(item => item.id !== removeProduct.id);
-        })
-    }
+            const exist = prev.find(item => item.id === updatedProduct.id);
+            if (!exist) { console.error("Product Not Found"); return prev; }
+            return prev.map(item =>
+                item.id === updatedProduct.id ? { ...item, ...updatedProduct } : item
+            );
+        });
+    };
+
+    const removeProduct = (product: CartItem) => {
+        setCart((prev) => {
+            const exists = prev.find((item) => item.id === product.id);
+            if (!exists) { console.error("Product Not Found"); return prev; }
+            return prev.filter(item => item.id !== product.id);
+        });
+    };
 
     const handleLogout = async () => {
         setError("");
@@ -117,48 +115,42 @@ const StoreContextProvider = ({ children }: { children: ReactNode }) => {
             setLoading(true);
             await Promise.all([
                 logout(),
-                new Promise(resolve => (setTimeout(resolve, 300)))
+                new Promise(resolve => setTimeout(resolve, 300))
             ]);
-            // onClose();
             navigate('/signin');
-            
         } catch (error) {
             setError("Logout failed. Please try again.");
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
-    
+    };
 
     const clearCart = () => setCart([]);
 
     const contextValue = {
         url,
         products,
-        loadingProducts,
-        cart,
-        countItem,
-        setCountItem,
-        addCount,
-        removeCount,
+        blogs,
+        user,setUser,
+        loading,
+        error, setError,
+        cart, setCart,
+        countItem, setCountItem,
+        addCount, removeCount,
         subTotal,
         addToCart,
-        setCart,
         updateProduct,
         removeProduct,
         clearCart,
         deliveryfee,
         handleLogout,
-        loading,
-        setError,
-        error,
-    }
+    };
 
     return (
         <StoreContext.Provider value={contextValue}>
             {children}
         </StoreContext.Provider>
-    )
-}
+    );
+};
 
-export default StoreContextProvider
+export default StoreContextProvider;

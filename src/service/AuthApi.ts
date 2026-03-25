@@ -13,6 +13,8 @@ export const login = async (data: LoginRequest): Promise<AuthResponse> => {
     return res.data;
 };
 
+
+
 export const register = async (data: RegisterRequest): Promise<AuthResponse> => {
     const res = await api.post<AuthResponse>("/signup", data);
     localStorage.setItem("token", res.data.token);

@@ -1,69 +1,24 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { ChevronDown, ShoppingBag, Star } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { StoreContext } from './../Context/StoreContext';
 
-type Product = {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  img: string;
-  tag?: string;
-}
+// type Product = {
+//   id: string;
+//   name: string;
+//   price: number;
+//   category: string;
+//   img: string;
+//   tag?: string;
+// }
 
-const mockProducts: Product[] = [
-  {
-    id: "1",
-    name: "Château Margaux 2022",
-    price: 299.99,
-    category: "Red Wine",
-    img: "https://assets.wine.com/winecom/image/upload/w_600,h_400,dpr_2.0,c_fit,q_auto:good,fl_progressive/jirrdoplunlf1vimiw4h.jpg",
-    tag: "Best Seller",
-  },
-  {
-    id: "2",
-    name: "Penfolds Grange 2018",
-    price: 450.00,
-    category: "Red Wine",
-    img: "https://images.vivino.com/thumbs/ApnIiXjcAt4eu2poxMnCQA_pb_x600.png",
-    tag: "Rare",
-  },
-  {
-    id: "3",
-    name: "Cloudy Bay Sauvignon Blanc",
-    price: 89.99,
-    category: "White Wine",
-    img: "https://images.vivino.com/thumbs/ApnIiXjcAt4eu2poxMnCQA_pb_x600.png",
-  },
-  {
-    id: "4",
-    name: "Moët & Chandon Impérial",
-    price: 149.99,
-    category: "Sparkling",
-    img: "https://images.vivino.com/thumbs/ApnIiXjcAt4eu2poxMnCQA_pb_x600.png",
-    tag: "New",
-  },
-  {
-    id: "5",
-    name: "Whispering Angel Rosé",
-    price: 79.99,
-    category: "Rosé",
-    img: "https://images.vivino.com/thumbs/ApnIiXjcAt4eu2poxMnCQA_pb_x600.png",
-  },
-  {
-    id: "6",
-    name: "Opus One 2019",
-    price: 399.99,
-    category: "Red Wine",
-    img: "https://images.vivino.com/thumbs/ApnIiXjcAt4eu2poxMnCQA_pb_x600.png",
-    tag: "Limited",
-  },
-];
 
 const Shop = () => {
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('All Wines');
-  const [priceRange, setPriceRange] = useState(500);
+  const [priceRange, setPriceRange] = useState(200);
+  const { products} = useContext(StoreContext);
+  
 
   return (
     <div className="bg-[#FCFBFA] min-h-screen font-sans selection:bg-red-100">
@@ -79,9 +34,9 @@ const Shop = () => {
             Discover our hand-picked selection of world-class vintages, from the rolling hills of Tuscany to the valleys of Napa.
           </p>
         </div>
+      
       </section>
 
-      {/* --- STICKY FILTER BAR --- */}
       <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-stone-100 shadow-sm">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="hidden lg:flex gap-8">
@@ -163,13 +118,12 @@ const Shop = () => {
             </button>
           </aside>
 
-          {/* --- PRODUCT GRID --- */}
           <main className="flex-1">
-            {mockProducts.length === 0 ? (
+            {products.length === 0 ? (
               <p className="text-stone-400 text-3xl text-center">No Products Found.</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-10 gap-y-20">
-                {mockProducts.map((product) => (
+                {products.map((product: any) => (
                   <div key={product.id} className="group">
                     <div className="relative aspect-[3/4] bg-[#F7F7F7] flex items-center justify-center p-10 overflow-hidden group-hover:bg-white group-hover:shadow-2xl transition-all duration-700">
                       {product.tag && (
@@ -206,7 +160,6 @@ const Shop = () => {
 
         </div>
 
-        {/* Pagination */}
         <div className="mt-24 flex justify-center items-center gap-3">
           <button className="px-4 py-2 border border-stone-200 text-[10px] uppercase tracking-widest font-bold text-stone-400 hover:text-stone-900 hover:border-stone-900 transition-all duration-300">
             Prev

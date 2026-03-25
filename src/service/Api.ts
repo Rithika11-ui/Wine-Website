@@ -10,7 +10,6 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("token");
     const isAuthRoute = config.url === "/signin" || config.url === "/signup";
 
-    // if (token) config.headers.Authorization = `Bearer ${token}`;
     if (token && !isAuthRoute) {
         config.headers.Authorization = `Bearer ${token}`;
     }

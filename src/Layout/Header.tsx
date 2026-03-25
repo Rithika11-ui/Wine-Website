@@ -53,7 +53,7 @@ const Header = () => {
             {header.map((item) =>
               item.hasDropdown ? (
                 <div
-                  key={item.label}
+                  key={item.path}
                   className="relative flex items-center"
                   onMouseEnter={handleMouseEnter}
                   onMouseLeave={handleMouseLeave}
@@ -123,7 +123,7 @@ const Header = () => {
 
                 // Normal links
                 <Link
-                  key={item.label}
+                  key={item.path}
                   to={item.path}
                   className={`transition-colors duration-200 hover:text-red-800 ${
                     isActive(item.path) ? 'text-red-800 font-medium' : 'text-stone-600'
